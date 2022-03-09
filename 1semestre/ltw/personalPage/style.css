@@ -1,0 +1,79 @@
+body {
+  background-color: wheat;
+}
+
+h1,
+h2,
+h3 {
+  font-family: "Courier New", Courier, monospace;
+  font-weight: bold;
+  font-style: normal;
+}
+
+h1 {
+  font-size: x-large;
+}
+
+h3 {
+  font-size: medium;
+}
+
+h4 {
+  font-weight: normal;
+}
+
+p {
+  margin-left: 3vw;
+}
+
+.paragrafo1::first-letter {
+  font-size: xx-large;
+}
+
+a {
+  text-decoration: none;
+}
+
+a:link {
+  color: violet;
+  text-decoration: underline;
+}
+a:visited {
+  color: blue;
+}
+a:hover {
+  color: cyan;
+}
+
+figure {
+  float: right;
+  margin-left: 10px;
+  margin-top: 0;
+}
+
+figcaption {
+  text-align: center;
+  font-style: italic;
+  font-size: 0.9em;
+}
+
+ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background-color: lavender;
+}
+
+li {
+  float: left;
+  padding: 5px;
+  border-right: 1px solid black;
+  padding-left: 10px;
+}
+
+li a {
+  list-style-type: none;
+  display: block;
+  text-align: center;
+}
