@@ -118,6 +118,17 @@ def dfs():
 
 # Iterative Deepening Strategy
 
+# n ->  Tree Node
+
+
+def calcDeepness(n):
+    val = 0
+    while n.prev != NULL:
+        val += 1
+        n = n.prev
+
+    return val
+
 
 def iterativeDeepening():
     currMaxDeepness = 1
@@ -125,7 +136,8 @@ def iterativeDeepening():
 
     while (True):
         foundNextNode = True
-        currDeepness = 0
+        queue = [initialState]
+        history = []
         while True:
             while(True):
                 if len(queue) == 0:  # No solution found
@@ -139,7 +151,13 @@ def iterativeDeepening():
                     break
 
             if not foundNextNode:   # Go increasse deepness
+                print("Will increase deepness..")
                 break
+
+            deepnessVal = calcDeepness(currentNode)
+            if deepnessVal >= currMaxDeepness:
+                print("Reached max deepness: ", currMaxDeepness)
+                continue
 
             if currentState[0] == 2:    # Found solution
                 foundSol = True
