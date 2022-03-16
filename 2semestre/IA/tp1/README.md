@@ -1,3 +1,4 @@
+# TP1
 ## Formulation of Search Problems and Problem Solving  using Uninformed search
 
 ### 1.1 Two Buckets Problem
@@ -38,3 +39,64 @@ S=(Mesq, Cesq, BarcoED)
 | 2C          |                                                    |        |      |
 | 1M          |                                                    |        |      |
 | 1C          |                                                    |        |      |
+
+# TP2
+## Problem-Solving using Informed Search
+
+Informed search requires an heuristic to evaluate each node and decide which is visited first
+
+If heuristic is:
+- h (b (B1, B2)) :- h is abs(B1 - 2)
+
+A* is an informed search algorithm that applies a heuristic h :- F = G + H.
+
+G -> How much it cost to reach the current state
+H -> Estimates Distance to Solution
+
+When using only G, we are applying a uniform search
+When using only H, we are applying a greedy search
+
+### Exercise 2
+#### 2.1
+a) C 
+
+b) E
+
+c) D, Chooses the node with the least total cost to reach (G)
+ 
+d) C, Chooses the node with the least distance to the solution, according to h
+
+e) G, chooses the node with the least sum of the 2 above (G + H)
+
+#### 2.2
+State Representation (0 is empty) -> 
+```
+    [1, 5, 3],
+    [4, 2, 8], 
+    [7, 0, 6]
+    
+    Empty Position = ( 2 (RE), 1 (CE) ) -> So that we don't need to always iterate to find it
+```
+
+
+Operators:
+
+| Operator         | Preconditions | Effect                                               | Cost |
+|------------------|---------------|------------------------------------------------------|------|
+| move piece left  | CE < N - 1    | S[RE, CE] = S[RE, CE+1]; S[RE, CE+1] = 0; CE=CE+1;   | 1    |
+| move piece right | CE > 0        | S[RE, CE] = S[RE, CE-1]; S[RE, CE-1] = 0; CE=CE-1    | 1    |
+| move piece up    | RE < N - 1    | S[RE, CE] = S[RE+1, CE]; S[RE+1, CE] = 0; RE = RE+1; | 1    |
+| move piece down  | RE > 0        | S[RE, CE] = S[RE-1, CE]; S[RE-1, CE] = 0; RE = RE-1; | 1    |
+
+c) 
+
+When a heuristic appears to be good and after expanding the tree it turns out to be very costly, it means the heuristic function is probably not that good after all :c
+
+H1 - Number of incorrect placed pieces
+
+H2 - Sum of Manhattan distances from incorrect placed pieces to their correct places
+
+**Admissible Heuristic** - Heuristic that never super-estimates the real cost to reach the solution.
+
+If an heuristic is not admissible, A* will not be able to find the optimal solution
+
