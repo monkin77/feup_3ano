@@ -1,6 +1,6 @@
 import Tree
 
-initialState = Tree.Node((0, 0), 0, -1)
+initialState = Tree.Node((0, 0), -1)
 c1 = 4
 c2 = 3
 finalCapacity = 2
@@ -48,10 +48,11 @@ def verifyTransitions(state, history):
 
 # Breadth-First Search
 
+
 def bfs():
     while True:
         currentNode = queue[0]
-        currentState = currentNode.state
+        currentState = currentNode.value
         if currentState[0] == 2:
             break
         # print("Queue:")
@@ -60,16 +61,16 @@ def bfs():
 
         currTransitions = verifyTransitions(currentState, history)
         for transition in currTransitions:
-            queue.append(Tree.Node(transition, 1, currentNode))
+            queue.append(Tree.Node(transition, currentNode))
             history.append(transition)
 
         queue.pop(0)
 
     sol = []
     while currentNode.prev != -1:
-        sol.insert(0, currentNode.state)
+        sol.insert(0, currentNode.value)
         currentNode = currentNode.prev
-    sol.insert(0, currentNode.state)
+    sol.insert(0, currentNode.value)
 
     print("Breadth-First search path:")
     for node in sol:
@@ -84,7 +85,7 @@ def dfs():
             if len(queue) == 0:  # No solution found
                 return
             currentNode = queue[0]
-            currentState = currentNode.state
+            currentState = currentNode.value
             queue.pop(0)
             if currentState not in history:
                 history.append(currentState)
@@ -96,7 +97,7 @@ def dfs():
         currTransitions = verifyTransitions(currentState, history)
         offset = 0
         for transition in currTransitions:
-            queue.insert(offset, Tree.Node(transition, 1, currentNode))
+            queue.insert(offset, Tree.Node(transition, currentNode))
             offset += 1
 
         print("queue:")
@@ -104,9 +105,9 @@ def dfs():
             print(elem.__str__())
     sol = []
     while currentNode.prev != -1:
-        sol.insert(0, currentNode.state)
+        sol.insert(0, currentNode.value)
         currentNode = currentNode.prev
-    sol.insert(0, currentNode.state)
+    sol.insert(0, currentNode.value)
 
     print("Depth-First search path:")
     for node in sol:
@@ -140,7 +141,7 @@ def iterativeDeepening():
                     foundNextNode = False
                     break
                 currentNode = queue[0]
-                currentState = currentNode.state
+                currentState = currentNode.value
                 queue.pop(0)
                 if currentState not in history:
                     history.append(currentState)
@@ -162,7 +163,7 @@ def iterativeDeepening():
             currTransitions = verifyTransitions(currentState, history)
             offset = 0
             for transition in currTransitions:
-                queue.insert(offset, Tree.Node(transition, 1, currentNode))
+                queue.insert(offset, Tree.Node(transition, currentNode))
                 offset += 1
 
             print("queue:")
@@ -174,9 +175,9 @@ def iterativeDeepening():
 
     sol = []
     while currentNode.prev != -1:
-        sol.insert(0, currentNode.state)
+        sol.insert(0, currentNode.value)
         currentNode = currentNode.prev
-    sol.insert(0, currentNode.state)
+    sol.insert(0, currentNode.value)
 
     print("Iterative Deepening search path:")
     for node in sol:

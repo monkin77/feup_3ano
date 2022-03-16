@@ -1,8 +1,7 @@
 class Node:
-    def __init__(self, state, cost, prev) -> None:
-        self.state = state
-        self.cost = cost
+    def __init__(self, value, prev) -> None:
+        self.value = value
         self.prev = prev
 
     def __str__(self):
-        return self.state
+        return self.value
