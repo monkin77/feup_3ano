@@ -51,6 +51,7 @@ If heuristic is:
 A* is an informed search algorithm that applies a heuristic h :- F = G + H.
 
 G -> How much it cost to reach the current state
+
 H -> Estimates Distance to Solution
 
 When using only G, we are applying a uniform search
