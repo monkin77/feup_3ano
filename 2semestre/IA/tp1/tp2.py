@@ -298,3 +298,11 @@ def aStar(type):
     print("A* search path:")
     for node in sol:
         print(node[0])
+
+
+# STEPS TO MAKE THIS GENERAL
+"""
+1 - verifyTransitions and isFinalState As an argument/hierarchy
+2-  verifyTransitions receiving the heuristic as argument
+
+"""
