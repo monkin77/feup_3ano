@@ -1,13 +1,18 @@
 import Tree
 from copy import deepcopy
 
+algTypes = {
+    "uniform": 1,
+    "greedy": 2,
+    "A*": 3
+}
+
 
 class SearchProblem:
     def __init__(self, initState, goalState, isFinalState):
         self.initState = initState
         self.goalState = goalState
         self.initialNode = Tree.Node((initState, 0), -1)
-        self.boardSize = len(initState[0])
         self.queue = [self.initialNode]
         self.isFinalState = isFinalState
 
@@ -21,7 +26,7 @@ class SearchProblem:
         return sol
 
     # verifyTransitions determines if it is uniform, greedy or A*
-    def informedSearch(self, type, verifyTransitions):
+    def informedSearch(self, type, verifyTransitions, algType):
         while True:
             if len(self.queue) == 0:
                 print("No solution found :(")
@@ -32,7 +37,7 @@ class SearchProblem:
             if self.isFinalState(currentState):
                 break
 
-            currTransitions = verifyTransitions(currentNode, type)
+            currTransitions = verifyTransitions(currentNode, type, algType)
             for transition in currTransitions:
                 self.queue.append(Tree.Node(transition, currentNode))
 
