@@ -32,7 +32,7 @@ class SearchProblem:
                 return -1
             currentNode = self.queue[0]
             (currentState, _) = currentNode.value
-            # print("currentState: ", currentState)
+            print("currentState: ", currentState)
             if self.isFinalState(currentState):
                 break
 

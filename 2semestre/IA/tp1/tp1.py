@@ -75,6 +75,7 @@ def bfs():
     print("Breadth-First search path:")
     for node in sol:
         print(node)
+    print("Solution depth:", len(sol))
 
 # Depth First Search
 
@@ -112,6 +113,7 @@ def dfs():
     print("Depth-First search path:")
     for node in sol:
         print(node)
+    print("Solution depth:", len(sol))
 
 # Iterative Deepening Strategy
 
@@ -182,3 +184,4 @@ def iterativeDeepening():
     print("Iterative Deepening search path:")
     for node in sol:
         print(node)
+    print("Solution depth:", len(sol))

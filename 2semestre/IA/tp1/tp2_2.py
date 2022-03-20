@@ -67,7 +67,7 @@ def verifyTransitions(node: Tree.Node, type, algType):
     prevBoard = state[0]
     (RE, CE) = state[1]
     # If algorithm is greedy cost does not take into account the cost to reach the current state
-    cost = node.value[1] if algType != algTypes["greedy"] else 0
+    cost = node.value[1] + 1 if algType != algTypes["greedy"] else 0
 
     transitions = []
     if CE < boardSize - 1:  # Move Piece left
