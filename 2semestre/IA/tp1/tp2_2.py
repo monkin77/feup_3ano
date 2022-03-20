@@ -120,20 +120,17 @@ def verifyTransitions(node: Tree.Node, type, algType):
 
 def uniformCost():
     print("Calculating Uniform solution...")
-    solution = SearchProblem(initState, goalState, isFinalState)
+    solution = SearchProblem(initState, isFinalState)
     solution.informedSearch(-1, verifyTransitions, algTypes["uniform"])
 
 
 def greedy(type):
     print("Calculating Greedy solution for type", type, "...")
-    solution = SearchProblem(initState, goalState, isFinalState)
+    solution = SearchProblem(initState, isFinalState)
     solution.informedSearch(type, verifyTransitions, algTypes["greedy"])
 
 
 def aStar(type):
     print("Calculating A* solution for type", type, "...")
-    solution = SearchProblem(initState, goalState, isFinalState)
+    solution = SearchProblem(initState, isFinalState)
     solution.informedSearch(type, verifyTransitions, algTypes["A*"])
-
-
-# STEPS TO MAKE THIS GENERAL

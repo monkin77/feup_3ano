@@ -8,104 +8,57 @@ c1 = 4
 c2 = 3
 
 
-def verifyTransitions(state, history):
-    transitions = []
-    if state[0] < c1:   # fill B1
-        s1 = (c1, state[1])
-        if not s1 in history:
-            transitions.append(s1)
-    if state[1] < c2:
-        s2 = (state[0], c2)
-        if not s2 in history:
-            transitions.append(s2)
-    if state[0] > 0:    # empty B1
-        s3 = (0, state[1])
-        if not s3 in history:
-            transitions.append(s3)
-    if state[1] > 0:
-        s4 = (state[0], 0)
-        if not s4 in history:
-            transitions.append(s4)
-
-    if state[0] > c2-state[1] and state[1] < c2:
-        s5 = (state[0] - (c2-state[1]), c2)
-        if not s5 in history:
-            transitions.append(s5)
-    if c2 - state[1] > state[0]:
-        s6 = (0, state[0] + state[1])
-        if not s6 in history:
-            transitions.append(s6)
-    if state[1] > c1-state[0] and state[0] < c1:
-        s7 = (c1, state[1] - (c1-state[0]))
-        if not s7 in history:
-            transitions.append(s7)
-    if c1 - state[0] > state[1]:
-        s8 = (state[0] + state[1], 0)
-        if not s8 in history:
-            transitions.append(s8)
-
-    return transitions
-
-
-initState = (
-    [[1, 2, 3],
-     [4, 5, 6],
-     [7, 0, 8]],
-    (2, 1)
-)
-
-goalState = [
-    [1, 2, 3],
-    [4, 5, 6],
-    [7, 8, 0]
-]
-
-boardSize = len(initState[0])
-
-
-def isArrayEqual(l1, l2):
-    for i in range(0, len(l1), 1):
-        for j in range(0, len(l1[0]), 1):
-            if l1[i][j] != l2[i][j]:
-                return False
-    return True
-
-
 def isFinalState(currState):
-    currPositions = currState[0]
-    return isArrayEqual(currPositions, goalState)
+    return currState[0] == 2
 
 
-def getPrevNodes(node: Tree.Node):
-    sol = []
-    currentNode = node
-    while currentNode.prev != -1:
-        sol.insert(0, currentNode.value)
-        currentNode = currentNode.prev
-    sol.insert(0, currentNode.value)
-    return sol
-
-
-def isVisited(currentLeaf: Tree.Node, newBoard):
+def isVisited(currentLeaf: Tree.Node, newState):
     currentNode = currentLeaf
     while currentNode != -1:
-        if isArrayEqual(currentNode.value[0][0], newBoard):
+        if currentNode.value[0] == newState:
             return True
         currentNode = currentNode.prev
     return False
 
 
-def verifyUniformTransitions(node: Tree.Node, type):
-    prevBoard = node.value[0][0]
-    (RE, CE) = node.value[0][1]
-    cost = node.value[1]
-    newCost = cost + 1  # Since the newCost is cost+1 in this case
+def heuristic(state, currCost, type):
+    board = state[0]
+    h = currCost
+    if type == 1:   # Nº of incorrectly placed pieces
+        for i in range(0, len(board), 1):
+            for j in range(0, len(board[0]), 1):
+                if board[i][j] != goalState[i][j]:
+                    h += 1
+    else:   # Sum of Manhatan distances from incorrected placed pieces to their correct places
+        for i in range(0, len(board), 1):
+            for j in range(0, len(board[0]), 1):
+                currVal = board[i][j]
+                if currVal != 0:
+                    goalCol = (currVal - 1) % boardSize
+                    goalRow = (currVal - 1) // boardSize
+                else:
+                    goalCol = boardSize - 1
+                    goalRow = boardSize - 1
+                h += (abs(i-goalRow) + abs(j - goalCol))
+    return h
+
+
+def verifyTransitions(node: Tree.Node, type, algType):
+    state = node.value[0]
+    prevBoard = state[0]
+    (RE, CE) = state[1]
+    # If algorithm is greedy cost does not take into account the cost to reach the current state
+    cost = node.value[1] if algType != algTypes["greedy"] else 0
+
     transitions = []
     if CE < boardSize - 1:  # Move Piece left
         newBoard = deepcopy(prevBoard)
         newBoard[RE][CE] = prevBoard[RE][CE+1]
         newBoard[RE][CE+1] = 0
         newEmptyPos = (RE, CE+1)
+        # If algorith is uniform, cost is the cost to reach the current state
+        newCost = heuristic((newBoard, newEmptyPos), cost,
+                            type) if algType != algTypes["uniform"] else cost
         newNode = ((newBoard, newEmptyPos), newCost)
         if not isVisited(node, newBoard):
             transitions.append(newNode)
@@ -114,6 +67,9 @@ def verifyUniformTransitions(node: Tree.Node, type):
         newBoard[RE][CE] = prevBoard[RE][CE-1]
         newBoard[RE][CE-1] = 0
         newEmptyPos = (RE, CE-1)
+        # If algorith is uniform, cost is the cost to reach the current state
+        newCost = heuristic((newBoard, newEmptyPos), cost,
+                            type) if algType != algTypes["uniform"] else cost
         newNode = ((newBoard, newEmptyPos), newCost)
         if not isVisited(node, newBoard):
             transitions.append(newNode)
@@ -122,6 +78,9 @@ def verifyUniformTransitions(node: Tree.Node, type):
         newBoard[RE][CE] = prevBoard[RE+1][CE]
         newBoard[RE+1][CE] = 0
         newEmptyPos = (RE+1, CE)
+        # If algorith is uniform, cost is the cost to reach the current state
+        newCost = heuristic((newBoard, newEmptyPos), cost,
+                            type) if algType != algTypes["uniform"] else cost
         newNode = ((newBoard, newEmptyPos), newCost)
         if not isVisited(node, newBoard):
             transitions.append(newNode)
@@ -130,6 +89,9 @@ def verifyUniformTransitions(node: Tree.Node, type):
         newBoard[RE][CE] = prevBoard[RE-1][CE]
         newBoard[RE-1][CE] = 0
         newEmptyPos = (RE-1, CE)
+        # If algorith is uniform, cost is the cost to reach the current state
+        newCost = heuristic((newBoard, newEmptyPos), cost,
+                            type) if algType != algTypes["uniform"] else cost
         newNode = ((newBoard, newEmptyPos), newCost)
         if not isVisited(node, newBoard):
             transitions.append(newNode)
@@ -139,32 +101,17 @@ def verifyUniformTransitions(node: Tree.Node, type):
 
 def uniformCost():
     print("Calculating Uniform solution...")
-    solution = SearchProblem(initState, goalState, isFinalState)
-    solution.informedSearch(-1, verifyUniformTransitions)
-
-
-def heuristic(state, currCost, algType):
-    board = state[0]
-    # If type is greedy, then cost up until now does not count
-    h = currCost if algType != algTypes["greedy"] else 0
-    if algType != algTypes["uniform"]:
-        for i in range(0, len(board), 1):
-            for j in range(0, len(board[0]), 1):
-                if board[i][j] != goalState[i][j]:
-                    h += 1
-
-    return h
+    solution = SearchProblem(initState, isFinalState)
+    solution.informedSearch(-1, verifyTransitions, algTypes["uniform"])
 
 
 def greedy(type):
     print("Calculating Greedy solution for type", type, "...")
-    solution = SearchProblem(initState, goalState, isFinalState)
-    heuristic = heuristic1 if type == 1 else heuristic2
-    solution.informedSearch(heuristic, algTypes["greedy"])
+    solution = SearchProblem(initState, isFinalState)
+    solution.informedSearch(type, verifyTransitions, algTypes["greedy"])
 
 
 def aStar(type):
     print("Calculating A* solution for type", type, "...")
-    solution = SearchProblem(initState, goalState, isFinalState)
-    heuristic = heuristic1 if type == 1 else heuristic2
-    solution.informedSearch(heuristic, algTypes["A*"])
+    solution = SearchProblem(initState, isFinalState)
+    solution.informedSearch(type, verifyTransitions, algTypes["A*"])

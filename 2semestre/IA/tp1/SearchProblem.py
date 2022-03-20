@@ -9,9 +9,8 @@ algTypes = {
 
 
 class SearchProblem:
-    def __init__(self, initState, goalState, isFinalState):
+    def __init__(self, initState, isFinalState):
         self.initState = initState
-        self.goalState = goalState
         self.initialNode = Tree.Node((initState, 0), -1)
         self.queue = [self.initialNode]
         self.isFinalState = isFinalState
