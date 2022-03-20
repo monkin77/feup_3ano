@@ -1,11 +1,12 @@
+from SearchProblem import SearchProblem
 import Tree
 from copy import deepcopy
 
 initState = (
-    [[1, 6, 2],
-     [5, 7, 3],
-     [0, 4, 8]],
-    (2, 0)
+    [[1, 2, 3],
+     [4, 5, 6],
+     [7, 0, 8]],
+    (2, 1)
 )
 
 goalState = [
@@ -13,13 +14,6 @@ goalState = [
     [4, 5, 6],
     [7, 8, 0]
 ]
-
-# Node value = (state, cost)
-initialNode = Tree.Node((initState, 0), -1)
-boardSize = len(initState[0])
-queue = [initialNode]
-history = []
-
 
 def isArrayEqual(l1, l2):
     for i in range(0, len(l1), 1):
@@ -53,7 +47,7 @@ def isVisited(currentLeaf: Tree.Node, newBoard):
     return False
 
 
-def verifyTransitions(node: Tree.Node):
+def verifyUniformTransitions(node: Tree.Node, type):
     prevBoard = node.value[0][0]
     (RE, CE) = node.value[0][1]
     cost = node.value[1]
@@ -96,45 +90,19 @@ def verifyTransitions(node: Tree.Node):
 
 
 def uniformCost():
-    while True:
-        if len(queue) == 0:
-            print("No solution found :(")
-            return -1
-        currentNode = queue[0]
-        (currentState, _) = currentNode.value
-        # print("currentState: ", currentState)
-        if isFinalState(currentState):
-            break
-        # print("Queue:")
-        # for elem in queue:
-        #     print(elem.__str__())
-
-        currTransitions = verifyTransitions(currentNode)
-        for transition in currTransitions:
-            queue.append(Tree.Node(transition, currentNode))
-
-        queue.pop(0)
-        queue.sort(key=lambda node: node.value[1])
-        # print("---currTransitions---")
-        # for node in queue:
-        #     print(node.value)
-
-    sol = getPrevNodes(currentNode)
-
-    print("Uniform-Cost search path:")
-    for node in sol:
-        print(node[0])
+    solution = SearchProblem(initState, goalState, isFinalState)
+    solution.informedSearch(-1, verifyUniformTransitions)
 
 
 def heuristic(state, currCost, type):
     board = state[0]
     h = currCost
-    if type == 1:
+    if type == 1:   # Nº of incorrectly placed pieces
         for i in range(0, len(board), 1):
             for j in range(0, len(board[0]), 1):
                 if board[i][j] != goalState[i][j]:
                     h += 1
-    else:
+    else:   # Sum of Manhatan distances from incorrected placed pieces to their correct places
         for i in range(0, len(board), 1):
             for j in range(0, len(board[0]), 1):
                 currVal = board[i][j]
@@ -198,31 +166,8 @@ def verifyGreedyTransitions(node: Tree.Node, type):
 
 
 def greedy(type):
-    while True:
-        if len(queue) == 0:
-            print("No solution found :(")
-            return -1
-        currentNode = queue[0]
-        (currentState, _) = currentNode.value
-        # print("currentState: ", currentState)
-        if isFinalState(currentState):
-            break
-
-        currTransitions = verifyGreedyTransitions(currentNode, type)
-        for transition in currTransitions:
-            queue.append(Tree.Node(transition, currentNode))
-
-        queue.pop(0)
-        queue.sort(key=lambda node: node.value[1])
-        # print("---currTransitions---")
-        # for node in queue:
-        #     print(node.value)
-
-    sol = getPrevNodes(currentNode)
-
-    # print("Greedy search path:")
-    for node in sol:
-        print(node[0])
+    solution = SearchProblem(initState, goalState, isFinalState)
+    solution.informedSearch(type, verifyGreedyTransitions)
 
 
 def verifyAStarTransitions(node: Tree.Node, type):
@@ -273,36 +218,8 @@ def verifyAStarTransitions(node: Tree.Node, type):
 
 
 def aStar(type):
-    while True:
-        if len(queue) == 0:
-            print("No solution found :(")
-            return -1
-        currentNode = queue[0]
-        (currentState, _) = currentNode.value
-        print("currentState: ", currentState)
-        if isFinalState(currentState):
-            break
-
-        currTransitions = verifyAStarTransitions(currentNode, type)
-        for transition in currTransitions:
-            queue.append(Tree.Node(transition, currentNode))
-
-        queue.pop(0)
-        queue.sort(key=lambda node: node.value[1])
-        # print("---currTransitions---")
-        # for node in queue:
-        #     print(node.value)
-
-    sol = getPrevNodes(currentNode)
-
-    print("A* search path:")
-    for node in sol:
-        print(node[0])
+    solution = SearchProblem(initState, goalState, isFinalState)
+    solution.informedSearch(type, verifyAStarTransitions)
 
 
 # STEPS TO MAKE THIS GENERAL
-"""
-1 - verifyTransitions and isFinalState As an argument/hierarchy
-2-  verifyTransitions receiving the heuristic as argument
-
-"""

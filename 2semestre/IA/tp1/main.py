@@ -6,6 +6,6 @@ if __name__ == '__main__':
     # tp1.dfs()
     # tp1.iterativeDeepening()
 
-    # tp2.uniformCost()
-    # tp2.greedy(1)
-    tp2.aStar(2)
+    tp2.uniformCost()
+    # tp2.greedy(2)
+    # tp2.aStar(2)
