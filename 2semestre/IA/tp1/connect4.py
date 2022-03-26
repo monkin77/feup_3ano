@@ -55,83 +55,66 @@ def make_turn(row, col):
 # Returns -> Number of horizontal solutions for a cell
 
 
-def checkHorizontal(row, col, player, numPieces):
-    piecesCount = 0
-    solCount = 0
-
-    for i in range(numPieces):
-        newCol = col+i
-        if newCol < BOARD_NUM_COLS:
-            if state["board"][row][newCol] == player:
-                piecesCount += 1
-            else:
-                break
-    if piecesCount == numPieces:
-        solCount += 1
-
-    piecesCount = 0
-    for i in range(numPieces):
-        newCol = col - i
-        if newCol >= 0:
-            if state["board"][row][newCol] == player:
-                piecesCount += 1
-            else:
-                break
-    if piecesCount == numPieces:
-        solCount += 1
-    return solCount
-
-# numPieces -> number of pieces trying to detect in a row
-# Returns -> Number of horizontal solutions for a cell
-
-
-def checkVertical(row, col, player, numPieces):
-    piecesCount = 0
-    solCount = 0
-
-    for i in range(numPieces):
-        newRow = row+i
-        if newRow < BOARD_NUM_ROWS:
-            if state["board"][newRow][col] == player:
-                piecesCount += 1
-            else:
-                break
-    if piecesCount == numPieces:
-        solCount += 1
-
-    piecesCount = 0
-    for i in range(numPieces):
-        newRow = row - i
-        if newRow >= 0:
-            if state["board"][newRow][col] == player:
-                piecesCount += 1
-            else:
-                break
-    if piecesCount == numPieces:
-        solCount += 1
-    return solCount
-
-
-"""
-# numPieces -> number of pieces trying to detect in a row
-# Returns -> Number of horizontal solutions for a cell
-"""
-def checkDiagonal(row, col, player, numPieces):
-    solCount = 0
-
-    directions = [(-1, -1), (-1, 1), (1, 1), (1, -1)]
-    for direction in directions:
+def checkHorizontal(row, col, player, numPieces, withEmptySlot):
+    for emptySlot in [0, numPieces-1]:
         piecesCount = 0
         for i in range(numPieces):
-            newRow = row + direction[0] * i
-            newCol = col + direction[1] * i
-            if (newRow < BOARD_NUM_ROWS) and (newRow >= 0) and (newCol >= 0) and (newCol < BOARD_NUM_COLS):
-                if state["board"][newRow][newCol] == player:
+            newCol = col+i
+            target = player if (i != emptySlot or (not withEmptySlot)) else EMPTY_CELL 
+            if newCol < BOARD_NUM_COLS:
+                if state["board"][row][newCol] == target:
                     piecesCount += 1
                 else:
                     break
         if piecesCount == numPieces:
-            solCount += 1
+            return 1
+
+    return 0
+
+# numPieces -> number of pieces trying to detect in a row
+# Returns -> Number of horizontal solutions for a cell
+
+
+def checkVertical(row, col, player, numPieces, withEmptySlot):
+    for emptySlot in [0, numPieces-1]:
+        piecesCount = 0
+        for i in range(numPieces):
+            newRow = row+i
+            target = player if (i != emptySlot or (not withEmptySlot)) else EMPTY_CELL 
+            if newRow < BOARD_NUM_ROWS:
+                if state["board"][newRow][col] == target:
+                    piecesCount += 1
+                else:
+                    break
+        if piecesCount == numPieces:
+            return 1
+
+    return 0
+
+
+"""
+# numPieces -> number of pieces trying to detect in a row
+# Returns -> Number of horizontal solutions for a cell
+"""
+def checkDiagonal(row, col, player, numPieces, withEmptySlot):
+    solCount = 0
+
+    directions = [(-1, 1), (1, 1)]
+
+    for direction in directions:
+        for emptySlot in [0, numPieces-1]:
+            piecesCount = 0
+            for i in range(numPieces):
+                newRow = row + direction[0] * i
+                newCol = col + direction[1] * i
+                target = player if (i != emptySlot or (not withEmptySlot)) else EMPTY_CELL 
+                if (newRow < BOARD_NUM_ROWS) and (newRow >= 0) and (newCol >= 0) and (newCol < BOARD_NUM_COLS):
+                    if state["board"][newRow][newCol] == target:
+                        piecesCount += 1
+                    else:
+                        break
+            if piecesCount == numPieces:
+                solCount += 1
 
     return solCount
 
@@ -140,15 +123,46 @@ def endGame():
     # DETECT ENDGAME
     for i in range(BOARD_NUM_ROWS):
         for j in range(BOARD_NUM_COLS):
-            if checkHorizontal(i, j, state["turn"], NUM_CONSECUTIVE):
+            if checkHorizontal(i, j, state["turn"], NUM_CONSECUTIVE, False):
                 return True
-            if checkVertical(i, j, state["turn"], NUM_CONSECUTIVE):
+            if checkVertical(i, j, state["turn"], NUM_CONSECUTIVE, False):
                 return True
-            if checkDiagonal(i, j, state["turn"], NUM_CONSECUTIVE):
+            if checkDiagonal(i, j, state["turn"], NUM_CONSECUTIVE, False):
                 return True
 
     return False
 
+def nlines4():
+    numSolutions = 0
+    for i in range(BOARD_NUM_ROWS):
+        for j in range(BOARD_NUM_COLS):
+            numSolutions += checkHorizontal(i, j, state["turn"], 4, False)
+            numSolutions += checkVertical(i, j, state["turn"], 4, False)
+            numSolutions += checkDiagonal(i, j, state["turn"], 4, False)
+    return numSolutions
+
+def nlines3():
+    numSolutions = 0
+    for i in range(BOARD_NUM_ROWS):
+        for j in range(BOARD_NUM_COLS):
+            numSolutions += checkHorizontal(i, j, state["turn"], 4, True)
+            numSolutions += checkVertical(i, j, state["turn"], 4, True)
+            numSolutions += checkDiagonal(i, j, state["turn"], 4, True)
+    return numSolutions
+
+def central():
+    numPoints = 0
+    midCol = BOARD_NUM_COLS // 2
+    for i in range(BOARD_NUM_ROWS):
+        if state["board"][i][midCol] == state["turn"]:
+            numPoints += 2
+    
+    for col in [midCol-1, midCol+1]:
+        for i in range(BOARD_NUM_ROWS):
+            if state["board"][i][col] == state["turn"]:
+                numPoints += 1
+    
+    return numPoints
 
 def play():
     while True:
@@ -157,6 +171,9 @@ def play():
         (row, col) = getPlayerInput()
         make_turn(row, col)
 
+        print("nlines4:", nlines4())
+        print("nlines3:", nlines3())
+        print("central:", central())
         if endGame():
             showBoard()
             print("Player", state["turn"], " Won the game!")
