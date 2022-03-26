@@ -15,7 +15,6 @@ state = {
 
 NUM_CONSECUTIVE = 4
 
-
 def showBoard():
     for row in state["board"]:
         print(row)
@@ -58,14 +57,14 @@ def make_turn(row, col, player, board):
 # Returns -> Number of horizontal solutions for a cell
 
 
-def checkHorizontal(row, col, player, numPieces, withEmptySlot):
+def checkHorizontal(row, col, player, board, numPieces, withEmptySlot):
     for emptySlot in [0, numPieces-1]:
         piecesCount = 0
         for i in range(numPieces):
             newCol = col+i
             target = player if (i != emptySlot or (not withEmptySlot)) else EMPTY_CELL 
             if newCol < BOARD_NUM_COLS:
-                if state["board"][row][newCol] == target:
+                if board[row][newCol] == target:
                     piecesCount += 1
                 else:
                     break
@@ -78,14 +77,14 @@ def checkHorizontal(row, col, player, numPieces, withEmptySlot):
 # Returns -> Number of horizontal solutions for a cell
 
 
-def checkVertical(row, col, player, numPieces, withEmptySlot):
+def checkVertical(row, col, player, board, numPieces, withEmptySlot):
     for emptySlot in [0, numPieces-1]:
         piecesCount = 0
         for i in range(numPieces):
             newRow = row+i
             target = player if (i != emptySlot or (not withEmptySlot)) else EMPTY_CELL 
             if newRow < BOARD_NUM_ROWS:
-                if state["board"][newRow][col] == target:
+                if board[newRow][col] == target:
                     piecesCount += 1
                 else:
                     break
@@ -99,7 +98,7 @@ def checkVertical(row, col, player, numPieces, withEmptySlot):
 # numPieces -> number of pieces trying to detect in a row
 # Returns -> Number of horizontal solutions for a cell
 """
-def checkDiagonal(row, col, player, numPieces, withEmptySlot):
+def checkDiagonal(row, col, player, board, numPieces, withEmptySlot):
     solCount = 0
 
     directions = [(-1, 1), (1, 1)]
@@ -112,7 +111,7 @@ def checkDiagonal(row, col, player, numPieces, withEmptySlot):
                 newCol = col + direction[1] * i
                 target = player if (i != emptySlot or (not withEmptySlot)) else EMPTY_CELL 
                 if (newRow < BOARD_NUM_ROWS) and (newRow >= 0) and (newCol >= 0) and (newCol < BOARD_NUM_COLS):
-                    if state["board"][newRow][newCol] == target:
+                    if board[newRow][newCol] == target:
                         piecesCount += 1
                     else:
                         break
@@ -122,54 +121,55 @@ def checkDiagonal(row, col, player, numPieces, withEmptySlot):
     return solCount
 
 
-def endGame():
+def endGame(board, player):
     # DETECT ENDGAME
     for i in range(BOARD_NUM_ROWS):
         for j in range(BOARD_NUM_COLS):
-            if checkHorizontal(i, j, state["turn"], NUM_CONSECUTIVE, False):
+            if checkHorizontal(i, j, player, board, NUM_CONSECUTIVE, False):
                 return True
-            if checkVertical(i, j, state["turn"], NUM_CONSECUTIVE, False):
+            if checkVertical(i, j, player, board, NUM_CONSECUTIVE, False):
                 return True
-            if checkDiagonal(i, j, state["turn"], NUM_CONSECUTIVE, False):
+            if checkDiagonal(i, j, player, board, NUM_CONSECUTIVE, False):
                 return True
 
     return False
 
-def nlines4(player):
+def nlines4(player, board):
     numSolutions = 0
     for i in range(BOARD_NUM_ROWS):
         for j in range(BOARD_NUM_COLS):
-            numSolutions += checkHorizontal(i, j, player, 4, False)
-            numSolutions += checkVertical(i, j, player, 4, False)
-            numSolutions += checkDiagonal(i, j, player, 4, False)
+            numSolutions += checkHorizontal(i, j, player, board, 4, False)
+            numSolutions += checkVertical(i, j, player, board, 4, False)
+            numSolutions += checkDiagonal(i, j, player, board, 4, False)
     return numSolutions
 
-def nlines3(player):
+def nlines3(player, board):
     numSolutions = 0
     for i in range(BOARD_NUM_ROWS):
         for j in range(BOARD_NUM_COLS):
-            numSolutions += checkHorizontal(i, j, player, 4, True)
-            numSolutions += checkVertical(i, j, player, 4, True)
-            numSolutions += checkDiagonal(i, j, player, 4, True)
+            numSolutions += checkHorizontal(i, j, player, board, 4, True)
+            numSolutions += checkVertical(i, j, player, board, 4, True)
+            numSolutions += checkDiagonal(i, j, player, board, 4, True)
     return numSolutions
 
-def central(player):
+def central(player, board):
     numPoints = 0
     midCol = BOARD_NUM_COLS // 2
     for i in range(BOARD_NUM_ROWS):
-        if state["board"][i][midCol] == player:
+        if board[i][midCol] == player:
             numPoints += 2
     
     for col in [midCol-1, midCol+1]:
         for i in range(BOARD_NUM_ROWS):
-            if state["board"][i][col] == player:
+            if board[i][col] == player:
                 numPoints += 1
     
     return numPoints
 
 def minimax(depth, alpha, beta, maximizingPlayer, board):
-    if depth == 0 or endGame(board):
-        return {"score": nlines4(2) - nlines4(1)}
+    player = 2 if maximizingPlayer else 1
+    if depth == 0 or endGame(board, player):
+        return {"score": nlines4(2, board) - nlines4(1, board)}
     
     if maximizingPlayer:
         maxEval = -math.inf
@@ -180,7 +180,7 @@ def minimax(depth, alpha, beta, maximizingPlayer, board):
             newBoard = board.copy()
             make_turn(row, col, 2, newBoard)
             eval = minimax(depth-1, alpha, beta, False, newBoard)
-            if eval > maxEval:
+            if eval["score"] > maxEval:
                 maxEval = eval
                 maxPlay = (row, col)
             alpha = max(alpha, eval)
@@ -188,9 +188,23 @@ def minimax(depth, alpha, beta, maximizingPlayer, board):
                 break
 
         return {"score": maxEval, "play": maxPlay}
-
     else:
-        
+        minEval = math.inf
+        for col in range(BOARD_NUM_COLS):
+            if not isValidCell(col):
+                continue
+            row = calculateRowFromCol(col, board)
+            newBoard = board.copy()
+            make_turn(row, col, 1, newBoard)
+            eval = minimax(depth-1, alpha, beta, True, newBoard)
+            if eval["score"] < minEval:
+                minEval = eval
+                minPlay = (row, col)
+            beta = min(beta, eval)
+            if beta <= alpha:
+                break
+
+        return {"score": minEval, "play": minPlay}
 
 def play():
     while True:
@@ -199,11 +213,11 @@ def play():
         if state["turn"] == 1:
             (row, col) = getPlayerInput()
         else:
-            (row, col) = minimax()
+            (row, col) = minimax(3, -math.inf, math.inf, True, state["board"])
 
         make_turn(row, col, state["turn"], state["board"])
 
-        if endGame():
+        if endGame(state["board"], state["turn"]):
             showBoard()
             print("Player", state["turn"], " Won the game!")
             return
