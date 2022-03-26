@@ -1,3 +1,6 @@
+import math
+
+
 BOARD_NUM_ROWS = 6
 BOARD_NUM_COLS = 7
 
@@ -31,9 +34,9 @@ def isValidCell(col):
     return state["board"][0][col] == EMPTY_CELL
 
 
-def calculateRowFromCol(col):
+def calculateRowFromCol(col, board):
     for i in range(BOARD_NUM_ROWS - 1, 0, -1):
-        if state["board"][i][col] == EMPTY_CELL:
+        if board[i][col] == EMPTY_CELL:
             return i
     return -1
 
@@ -43,13 +46,13 @@ def getPlayerInput():
         col = int(
             input("Player " + str(state["turn"]) + ", choose The Column\n"))
         if isValidCell(col):
-            row = calculateRowFromCol(col)
+            row = calculateRowFromCol(col, state["board"])
             return (row, col)
         print("That's an invalid input!")
 
 
-def make_turn(row, col):
-    state["board"][row][col] = P1_CELL if state["turn"] == 1 else P2_CELL
+def make_turn(row, col, player, board):
+    board[row][col] = player
 
 # numPieces -> number of pieces trying to detect in a row
 # Returns -> Number of horizontal solutions for a cell
@@ -132,48 +135,74 @@ def endGame():
 
     return False
 
-def nlines4():
+def nlines4(player):
     numSolutions = 0
     for i in range(BOARD_NUM_ROWS):
         for j in range(BOARD_NUM_COLS):
-            numSolutions += checkHorizontal(i, j, state["turn"], 4, False)
-            numSolutions += checkVertical(i, j, state["turn"], 4, False)
-            numSolutions += checkDiagonal(i, j, state["turn"], 4, False)
+            numSolutions += checkHorizontal(i, j, player, 4, False)
+            numSolutions += checkVertical(i, j, player, 4, False)
+            numSolutions += checkDiagonal(i, j, player, 4, False)
     return numSolutions
 
-def nlines3():
+def nlines3(player):
     numSolutions = 0
     for i in range(BOARD_NUM_ROWS):
         for j in range(BOARD_NUM_COLS):
-            numSolutions += checkHorizontal(i, j, state["turn"], 4, True)
-            numSolutions += checkVertical(i, j, state["turn"], 4, True)
-            numSolutions += checkDiagonal(i, j, state["turn"], 4, True)
+            numSolutions += checkHorizontal(i, j, player, 4, True)
+            numSolutions += checkVertical(i, j, player, 4, True)
+            numSolutions += checkDiagonal(i, j, player, 4, True)
     return numSolutions
 
-def central():
+def central(player):
     numPoints = 0
     midCol = BOARD_NUM_COLS // 2
     for i in range(BOARD_NUM_ROWS):
-        if state["board"][i][midCol] == state["turn"]:
+        if state["board"][i][midCol] == player:
             numPoints += 2
     
     for col in [midCol-1, midCol+1]:
         for i in range(BOARD_NUM_ROWS):
-            if state["board"][i][col] == state["turn"]:
+            if state["board"][i][col] == player:
                 numPoints += 1
     
     return numPoints
+
+def minimax(depth, alpha, beta, maximizingPlayer, board):
+    if depth == 0 or endGame(board):
+        return {"score": nlines4(2) - nlines4(1)}
+    
+    if maximizingPlayer:
+        maxEval = -math.inf
+        for col in range(BOARD_NUM_COLS):
+            if not isValidCell(col):
+                continue
+            row = calculateRowFromCol(col, board)
+            newBoard = board.copy()
+            make_turn(row, col, 2, newBoard)
+            eval = minimax(depth-1, alpha, beta, False, newBoard)
+            if eval > maxEval:
+                maxEval = eval
+                maxPlay = (row, col)
+            alpha = max(alpha, eval)
+            if beta <= alpha:
+                break
+
+        return {"score": maxEval, "play": maxPlay}
+
+    else:
+        
 
 def play():
     while True:
         showState()
 
-        (row, col) = getPlayerInput()
-        make_turn(row, col)
+        if state["turn"] == 1:
+            (row, col) = getPlayerInput()
+        else:
+            (row, col) = minimax()
 
-        print("nlines4:", nlines4())
-        print("nlines3:", nlines3())
-        print("central:", central())
+        make_turn(row, col, state["turn"], state["board"])
+
         if endGame():
             showBoard()
             print("Player", state["turn"], " Won the game!")
