@@ -172,39 +172,37 @@ def minimax(depth, alpha, beta, maximizingPlayer, board):
         return {"score": nlines4(2, board) - nlines4(1, board)}
     
     if maximizingPlayer:
-        maxEval = -math.inf
+        maxEval = {"score": -math.inf}
         for col in range(BOARD_NUM_COLS):
             if not isValidCell(col):
                 continue
             row = calculateRowFromCol(col, board)
-            newBoard = board.copy()
+            newBoard = [line.copy() for line in board]
             make_turn(row, col, 2, newBoard)
             eval = minimax(depth-1, alpha, beta, False, newBoard)
-            if eval["score"] > maxEval:
-                maxEval = eval
-                maxPlay = (row, col)
-            alpha = max(alpha, eval)
+            if eval["score"] > maxEval["score"]:
+                maxEval = {"score": eval["score"], "play": (row,col)}
+            alpha = max(alpha, eval["score"])
             if beta <= alpha:
                 break
 
-        return {"score": maxEval, "play": maxPlay}
+        return maxEval
     else:
-        minEval = math.inf
+        minEval = {"score": math.inf}
         for col in range(BOARD_NUM_COLS):
             if not isValidCell(col):
                 continue
             row = calculateRowFromCol(col, board)
-            newBoard = board.copy()
+            newBoard = [line.copy() for line in board]
             make_turn(row, col, 1, newBoard)
             eval = minimax(depth-1, alpha, beta, True, newBoard)
-            if eval["score"] < minEval:
-                minEval = eval
-                minPlay = (row, col)
-            beta = min(beta, eval)
+            if eval["score"] < minEval["score"]:
+                minEval = {"score": eval["score"], "play": (row, col)}
+            beta = min(beta, eval["score"])
             if beta <= alpha:
                 break
 
-        return {"score": minEval, "play": minPlay}
+        return minEval
 
 def play():
     while True:
@@ -213,7 +211,7 @@ def play():
         if state["turn"] == 1:
             (row, col) = getPlayerInput()
         else:
-            (row, col) = minimax(3, -math.inf, math.inf, True, state["board"])
+            (row, col) = minimax(3, -math.inf, math.inf, True, state["board"])["play"]
 
         make_turn(row, col, state["turn"], state["board"])
 
