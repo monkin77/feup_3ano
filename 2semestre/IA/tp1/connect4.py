@@ -166,10 +166,19 @@ def central(player, board):
     
     return numPoints
 
-def minimax(depth, alpha, beta, maximizingPlayer, board):
+def evalF1(board):
+    return nlines4(2, board) - nlines4(1, board)
+def evalF2(board):
+    return 100*evalF1(board) + nlines3(2, board) - nlines3(1, board)
+def evalF3(board):
+    return 100*evalF1(board) + central(2, board) - central(1, board)
+def evalF4(board):
+    return 5*evalF2(board) + evalF3(board)
+
+def minimax(depth, alpha, beta, maximizingPlayer, board, evaluation):
     player = 2 if maximizingPlayer else 1
     if depth == 0 or endGame(board, player):
-        return {"score": nlines4(2, board) - nlines4(1, board)}
+        return {"score": evaluation(board)}
     
     if maximizingPlayer:
         maxEval = {"score": -math.inf}
@@ -179,7 +188,7 @@ def minimax(depth, alpha, beta, maximizingPlayer, board):
             row = calculateRowFromCol(col, board)
             newBoard = [line.copy() for line in board]
             make_turn(row, col, 2, newBoard)
-            eval = minimax(depth-1, alpha, beta, False, newBoard)
+            eval = minimax(depth-1, alpha, beta, False, newBoard, evaluation)
             if eval["score"] > maxEval["score"]:
                 maxEval = {"score": eval["score"], "play": (row,col)}
             alpha = max(alpha, eval["score"])
@@ -195,7 +204,7 @@ def minimax(depth, alpha, beta, maximizingPlayer, board):
             row = calculateRowFromCol(col, board)
             newBoard = [line.copy() for line in board]
             make_turn(row, col, 1, newBoard)
-            eval = minimax(depth-1, alpha, beta, True, newBoard)
+            eval = minimax(depth-1, alpha, beta, True, newBoard, evaluation)
             if eval["score"] < minEval["score"]:
                 minEval = {"score": eval["score"], "play": (row, col)}
             beta = min(beta, eval["score"])
@@ -211,7 +220,7 @@ def play():
         if state["turn"] == 1:
             (row, col) = getPlayerInput()
         else:
-            (row, col) = minimax(3, -math.inf, math.inf, True, state["board"])["play"]
+            (row, col) = minimax(5, -math.inf, math.inf, True, state["board"], evalF4)["play"]
 
         make_turn(row, col, state["turn"], state["board"])
 
