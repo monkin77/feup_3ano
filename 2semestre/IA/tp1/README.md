@@ -100,4 +100,3 @@ H2 - Sum of Manhattan distances from incorrect placed pieces to their correct pl
 **Admissible Heuristic** - Heuristic that never super-estimates the real cost to reach the solution.
 
 If an heuristic is not admissible, A* will not be able to find the optimal solution
-

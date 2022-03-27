@@ -176,7 +176,7 @@ def evalF4(board):
     return 5*evalF2(board) + evalF3(board)
 
 def minimax(depth, alpha, beta, maximizingPlayer, board, evaluation):
-    player = 2 if maximizingPlayer else 1
+    player = 1 if maximizingPlayer else 2   # Since we are checking if the game ended in the perspective of the player who last played
     if depth == 0 or endGame(board, player):
         return {"score": evaluation(board)}
     
@@ -220,7 +220,7 @@ def play():
         if state["turn"] == 1:
             (row, col) = getPlayerInput()
         else:
-            (row, col) = minimax(5, -math.inf, math.inf, True, state["board"], evalF4)["play"]
+            (row, col) = minimax(5, -math.inf, math.inf, True, state["board"], evalF3)["play"]
 
         make_turn(row, col, state["turn"], state["board"])
 
